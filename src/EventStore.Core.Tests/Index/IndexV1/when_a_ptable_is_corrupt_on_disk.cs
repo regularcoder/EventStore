@@ -46,7 +46,7 @@ namespace EventStore.Core.Tests.Index.IndexV1
         [Test]
         public void the_hash_is_invalid()
         {
-            var exc = Assert.Throws<CorruptIndexException>(() => PTable.FromFile(_copiedfilename, 16));
+            var exc = Assert.Throws<CorruptIndexException>(() => PTable.FromFile(_copiedfilename, false, false, 16));
             Assert.IsInstanceOf<HashValidationException>(exc.InnerException);
         }
     }

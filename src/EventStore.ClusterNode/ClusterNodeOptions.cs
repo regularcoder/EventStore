@@ -200,6 +200,11 @@ namespace EventStore.ClusterNode
         [ArgDescription(Opts.IndexCacheDepthDescr, Opts.DbGroup)]
         public int IndexCacheDepth { get; set; }
 
+        [ArgDescription(Opts.UseMemoryMappedIndexFilesDescr, Opts.DbGroup)]
+        public bool UseMemoryMappedIndexFiles { get; set; }
+        [ArgDescription(Opts.SkipIndexVerificationDescr, Opts.DbGroup)]
+        public bool SkipIndexVerification { get; set; }
+
         [ArgDescription(Opts.GossipIntervalMsDescr, Opts.ClusterGroup)]
         public int GossipIntervalMs { get; set; }
         [ArgDescription(Opts.GossipAllowedDifferenceMsDescr, Opts.ClusterGroup)]
@@ -314,6 +319,8 @@ namespace EventStore.ClusterNode
             GossipAllowedDifferenceMs = Opts.GossipAllowedDifferenceMsDefault;
             GossipTimeoutMs = Opts.GossipTimeoutMsDefault;
             IndexCacheDepth = Opts.IndexCacheDepthDefault;
+            UseMemoryMappedIndexFiles = Opts.UseMemoryMappedIndexFilesDefault;
+            SkipIndexVerification = Opts.SkipIndexVerificationDefault;
             EnableHistograms = Opts.HistogramEnabledDefault;
             ReaderThreadsCount = Opts.ReaderThreadsCountDefault;
 

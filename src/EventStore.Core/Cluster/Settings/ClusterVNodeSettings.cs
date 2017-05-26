@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
@@ -64,6 +63,8 @@ namespace EventStore.Core.Cluster.Settings
         public readonly int MaxMemtableEntryCount;
         public readonly int HashCollisionReadLimit;
         public readonly int IndexCacheDepth;
+        public readonly bool UseMemoryMappedIndexFiles;
+        public readonly bool SkipIndexVerification;
         public readonly byte IndexBitnessVersion;
 
         public readonly bool BetterOrdering;
@@ -122,7 +123,10 @@ namespace EventStore.Core.Cluster.Settings
                                     bool startStandardProjections,
                                     bool disableHTTPCaching,
                                     bool logHttpRequests,
-                                    string index = null, bool enableHistograms = false,
+                                    string index = null, 
+                                    bool enableHistograms = false,
+                                    bool useMemoryMappedIndexFiles = false,
+                                    bool skipIndexVerification = false,
                                     int indexCacheDepth = 16,
                                     byte indexBitnessVersion = 2,
                                     IPersistentSubscriptionConsumerStrategyFactory[] additionalConsumerStrategies = null,
@@ -211,6 +215,8 @@ namespace EventStore.Core.Cluster.Settings
             HashCollisionReadLimit = hashCollisionReadLimit;
 
             EnableHistograms = enableHistograms;
+            UseMemoryMappedIndexFiles = useMemoryMappedIndexFiles;
+            SkipIndexVerification = skipIndexVerification;
             IndexCacheDepth = indexCacheDepth;
             IndexBitnessVersion = indexBitnessVersion;
             Index = index;
