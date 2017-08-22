@@ -135,7 +135,7 @@ namespace EventStore.Projections.Core.Services.Processing
                 case ReadStreamResult.Success:
                     if (message.Events.Length == 0)
                     {
-                        // the end
+                        _fromPositions = _fromPositions.UpdateStreamPosition(message.EventStreamId, message.NextEventNumber);
                         _eofs[message.EventStreamId] = true;
                         UpdateSafePositionToJoin(message.EventStreamId, MessageToLastCommitPosition(message));
                         CheckIdle();
@@ -143,6 +143,10 @@ namespace EventStore.Projections.Core.Services.Processing
                     }
                     else
                     {
+                        if (message.Events.First().OriginalEventNumber > _fromPositions.Streams[message.EventStreamId])
+                        {
+                            _fromPositions = _fromPositions.UpdateStreamPosition(message.EventStreamId, message.Events.First().OriginalEventNumber);
+                        }
                         _eofs[message.EventStreamId] = false;
                         for (int index = 0; index < message.Events.Length; index++)
                         {

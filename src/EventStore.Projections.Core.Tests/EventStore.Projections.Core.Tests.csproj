@@ -128,6 +128,8 @@
     <Compile Include="Services\emitted_stream\when_handling_a_timeout.cs" />
     <Compile Include="Services\event_reader\heading_event_reader\when_the_heading_event_reader_with_a_subscribed_projection_handles_a_cached_event_and_throws.cs" />
     <Compile Include="Services\event_reader\heading_event_reader\when_the_heading_event_reader_with_a_subscribed_projection_handles_a_live_event_and_throws.cs" />
+    <Compile Include="Services\event_reader\multi_stream_reader\when_handling_read_completed_for_a_stream_that_has_been_truncated.cs" />
+    <Compile Include="Services\event_reader\multi_stream_reader\when_handling_read_completed_and_with_no_events_but_next_event_number.cs" />
     <Compile Include="Services\projections_manager\managed_projection\when_persisted_state_write_fails.cs" />
     <Compile Include="Services\projections_manager\when_deleting_a_system_projection.cs" />
     <Compile Include="Services\projections_manager\when_posting_a_persistent_projection_and_registration_write_fails.cs" />
