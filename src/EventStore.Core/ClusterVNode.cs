@@ -122,6 +122,13 @@ namespace EventStore.Core
 
             _controller.SetMainQueue(_mainQueue);
 
+            if(!isSingleNode)
+            {
+                var filter = new ReplicationCheckpointFilter((IPublisher)_mainBus, _mainQueue, db.Config.ReplicationCheckpoint);
+                _mainBus.Subscribe<ReplicationMessage.ReplicationAckCheckTick>(filter);
+                _controller.SetFilter(filter);
+            }
+
             //SELF
             _mainBus.Subscribe<SystemMessage.StateChangeMessage>(this);
             _mainBus.Subscribe<SystemMessage.BecomeShutdown>(this);
@@ -166,7 +173,7 @@ namespace EventStore.Core
             var indexPath = vNodeSettings.Index ?? Path.Combine(db.Config.Path, "index");
             var readerPool = new ObjectPool<ITransactionFileReader>(
                 "ReadIndex readers pool", ESConsts.PTableInitialReaderCount, ESConsts.PTableMaxReaderCount,
-                () => new TFChunkReader(db, db.Config.WriterCheckpoint));
+                () => new TFChunkReader(db, db.Config.WriterCheckpoint, db.Config.ReplicationCheckpoint));
             var tableIndex = new TableIndex(indexPath,
                                             new XXHashUnsafe(),
                                             new Murmur3AUnsafe(),
@@ -190,7 +197,7 @@ namespace EventStore.Core
                                                 writer,
                                                 initialReaderCount: 1,
                                                 maxReaderCount: 5,
-                                                readerFactory: () => new TFChunkReader(db, db.Config.WriterCheckpoint));
+                                                readerFactory: () => new TFChunkReader(db, db.Config.WriterCheckpoint, db.Config.ReplicationCheckpoint));
             epochManager.Init();
 
             var storageWriter = new ClusterStorageWriterService(_mainQueue, _mainBus, vNodeSettings.MinFlushDelay,

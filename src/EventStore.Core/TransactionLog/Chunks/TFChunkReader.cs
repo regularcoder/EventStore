@@ -17,17 +17,25 @@ namespace EventStore.Core.TransactionLog.Chunks
 
         private readonly TFChunkDb _db;
         private readonly ICheckpoint _writerCheckpoint;
+        private readonly ICheckpoint _replicationCheckpoint;
         private long _curPos;
 
-        public TFChunkReader(TFChunkDb db, ICheckpoint writerCheckpoint, long initialPosition = 0)
+        public TFChunkReader(TFChunkDb db, ICheckpoint writerCheckpoint, ICheckpoint replicationCheckpoint, long initialPosition = 0)
         {
             Ensure.NotNull(db, "dbConfig");
             Ensure.NotNull(writerCheckpoint, "writerCheckpoint");
+            Ensure.NotNull(replicationCheckpoint, "replicationCheckpoint");
             Ensure.Nonnegative(initialPosition, "initialPosition");
 
             _db = db;
             _writerCheckpoint = writerCheckpoint;
+            _replicationCheckpoint = replicationCheckpoint;
             _curPos = initialPosition;
+        }
+
+        public TFChunkReader(TFChunkDb db, ICheckpoint writerCheckpoint, long initialPosition = 0)
+        : this(db, writerCheckpoint, new InMemoryCheckpoint(), initialPosition)
+        {
         }
 
         public void Reposition(long position)
@@ -45,7 +53,7 @@ namespace EventStore.Core.TransactionLog.Chunks
             while (true)
             {
                 var pos = _curPos;
-                var writerChk = _writerCheckpoint.Read();
+                var writerChk = GetCheckpoint();
                 if (pos >= writerChk)
                     return SeqReadResult.Failure;
 
@@ -90,7 +98,7 @@ namespace EventStore.Core.TransactionLog.Chunks
             while (true)
             {
                 var pos = _curPos;
-                var writerChk = _writerCheckpoint.Read();
+                var writerChk = GetCheckpoint();
                 // we allow == writerChk, that means read the very last record
                 if (pos > writerChk)
                     throw new Exception(string.Format("Requested position {0} is greater than writer checkpoint {1} when requesting to read previous record from TF.", pos, writerChk));
@@ -143,7 +151,7 @@ namespace EventStore.Core.TransactionLog.Chunks
 
         private RecordReadResult TryReadAtInternal(long position, int retries)
         {
-            var writerChk = _writerCheckpoint.Read();
+            var writerChk = GetCheckpoint();
             if (position >= writerChk)
                 return RecordReadResult.Failure;
 
@@ -168,7 +176,7 @@ namespace EventStore.Core.TransactionLog.Chunks
 
         private bool ExistsAtInternal(long position, int retries)
         {
-            var writerChk = _writerCheckpoint.Read();
+            var writerChk = GetCheckpoint();
             if (position >= writerChk)
                 return false;
 
@@ -184,6 +192,19 @@ namespace EventStore.Core.TransactionLog.Chunks
                     throw new FileBeingDeletedException("Been told the file was deleted > MaxRetries times. Probably a problem in db.");
                 return ExistsAtInternal(position, retries + 1);
             }
+        }
+
+        private long GetCheckpoint()
+        {
+            if(_replicationCheckpoint != null)
+            {
+                var checkpoint = _replicationCheckpoint.ReadNonFlushed();
+                if(checkpoint > 0)
+                {
+                    return checkpoint;
+                }
+            }
+            return _writerCheckpoint.Read();
         }
 
         private static void CountRead(bool isCached)

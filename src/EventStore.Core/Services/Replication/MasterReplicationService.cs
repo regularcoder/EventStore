@@ -145,7 +145,10 @@ namespace EventStore.Core.Services.Replication
         {
             ReplicaSubscription subscription;
             if (_subscriptions.TryGetValue(message.SubscriptionId, out subscription))
+            {
                 Interlocked.Exchange(ref subscription.AckedLogPosition, message.ReplicationLogPosition);
+                UpdateReplicationCheckpoint();
+            }
         }
 
         public void Handle(ReplicationMessage.GetReplicationStats message)
@@ -182,6 +185,7 @@ namespace EventStore.Core.Services.Replication
                 var subscriptionPos = SetSubscriptionPosition(replica, epochCorrectedLogPos, chunkId, 
                                                               replicationStart: true, verbose: true, trial: 0);
                 Interlocked.Exchange(ref replica.AckedLogPosition, subscriptionPos);
+                UpdateReplicationCheckpoint();
                 return true;
             }
             catch (Exception exc)
@@ -603,6 +607,19 @@ namespace EventStore.Core.Services.Replication
                 newSlave.LagOccurences = 0;
                 newSlave.SendMessage(new ReplicationMessage.SlaveAssignment(_instanceId, newSlave.SubscriptionId));
                 cloneIndex++;
+            }
+        }
+
+        private void UpdateReplicationCheckpoint()
+        {
+            if(_subscriptions.Count == 0) return;
+            var lowestInQuorum = _subscriptions.ToArray().Select(x => x.Value.AckedLogPosition)
+                                            .OrderByDescending(x => x).Take(_clusterSize/2).Min();
+            var replicationCheckpoint = _db.Config.ReplicationCheckpoint.ReadNonFlushed();
+
+            if(lowestInQuorum != replicationCheckpoint)
+            {
+                _db.Config.ReplicationCheckpoint.Write(lowestInQuorum);
             }
         }
 
