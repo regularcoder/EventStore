@@ -693,6 +693,7 @@
     <Compile Include="Services\Replication\CheckpointFilter\when_processing_event_committed_and_commit_position_is_greater_than_checkpoint.cs" />
     <Compile Include="Services\Replication\CheckpointFilter\when_processing_multiple_event_committed_messages.cs" />
     <Compile Include="Services\Replication\CheckpointFilter\when_processing_multiple_event_committed_messages_for_the_same_positions.cs" />
+    <Compile Include="Services\Replication\ReadStream\when_reading.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EventStore.ClientAPI.Embedded\EventStore.ClientAPI.Embedded.csproj">
