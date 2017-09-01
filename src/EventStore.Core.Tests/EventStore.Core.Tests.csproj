@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -682,6 +682,17 @@
     <Compile Include="Services\Storage\Scavenge\when_stream_is_softdeleted_with_mixed_log_record_version_0_and_version_1.cs" />
     <Compile Include="ClientAPI\ExpectedVersion64Bit\read_stream_with_link_to_event_with_event_number_greater_than_int_maxvalue.cs" />
     <Compile Include="Services\Replication\CheckpointFilter\when_processing_event_committed_and_commit_position_is_less_than_replication.cs" />
+    <Compile Include="Services\Replication\MasterReplication\with_master_replication_service.cs" />
+    <Compile Include="Services\Replication\MasterReplication\when_replica_subscribes_from_beginning.cs" />
+    <Compile Include="Services\Replication\MasterReplication\when_replica_subscribes_from_a_position_but_is_not_caught_up.cs" />
+    <Compile Include="Services\Replication\MasterReplication\when_subscription_acks_log_position.cs" />
+    <Compile Include="Services\Replication\MasterReplication\when_two_subscriptions_ack_log_positions_in_3_node_cluster.cs" />
+    <Compile Include="Services\Replication\MasterReplication\when_three_subscriptions_ack_log_positions_in_5_node_cluster.cs" />
+    <Compile Include="Services\Replication\MasterReplication\when_only_subscriptions_in_5_node_cluster_and_acks_log_position.cs" />
+    <Compile Include="Services\Replication\CheckpointFilter\with_replication_checkpoint_filter.cs" />
+    <Compile Include="Services\Replication\CheckpointFilter\when_processing_event_committed_and_commit_position_is_greater_than_checkpoint.cs" />
+    <Compile Include="Services\Replication\CheckpointFilter\when_processing_multiple_event_committed_messages.cs" />
+    <Compile Include="Services\Replication\CheckpointFilter\when_processing_multiple_event_committed_messages_for_the_same_positions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EventStore.ClientAPI.Embedded\EventStore.ClientAPI.Embedded.csproj">

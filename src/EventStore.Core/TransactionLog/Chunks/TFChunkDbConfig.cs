@@ -67,28 +67,9 @@ namespace EventStore.Core.TransactionLog.Chunks
                                bool inMemDb = false,
                                bool unbuffered = false,
                                bool writethrough = false)
+        : this(path, fileNamingStrategy, chunkSize, maxChunksCacheSize, writerCheckpoint, chaserCheckpoint,
+               epochCheckpoint, truncateCheckpoint, new InMemoryCheckpoint(), inMemDb, unbuffered, writethrough)
         {
-            Ensure.NotNullOrEmpty(path, "path");
-            Ensure.NotNull(fileNamingStrategy, "fileNamingStrategy");
-            Ensure.Positive(chunkSize, "chunkSize");
-            Ensure.Nonnegative(maxChunksCacheSize, "maxChunksCacheSize");
-            Ensure.NotNull(writerCheckpoint, "writerCheckpoint");
-            Ensure.NotNull(chaserCheckpoint, "chaserCheckpoint");
-            Ensure.NotNull(epochCheckpoint, "epochCheckpoint");
-            Ensure.NotNull(truncateCheckpoint, "truncateCheckpoint");
-            
-            Path = path;
-            ChunkSize = chunkSize;
-            MaxChunksCacheSize = maxChunksCacheSize;
-            WriterCheckpoint = writerCheckpoint;
-            ChaserCheckpoint = chaserCheckpoint;
-            EpochCheckpoint = epochCheckpoint;
-            TruncateCheckpoint = truncateCheckpoint;
-            FileNamingStrategy = fileNamingStrategy;
-            ReplicationCheckpoint = new InMemoryCheckpoint();
-            InMemDb = inMemDb;
-            Unbuffered = unbuffered;
-            WriteThrough = writethrough;
         }
     }
 }

@@ -105,6 +105,7 @@ namespace EventStore.Core.Services.Replication
 
         public void Handle(ReplicationMessage.ReplicaSubscriptionRequest message)
         {
+            Log.Debug("~~~~~~~~ Replica subscription request received. Current vnode state: {0}", _state);
             _publisher.Publish(new SystemMessage.VNodeConnectionEstablished(message.ReplicaEndPoint, message.Connection.ConnectionId));
 
             if (_state != VNodeState.Master || message.MasterId != _instanceId)
@@ -138,6 +139,7 @@ namespace EventStore.Core.Services.Replication
                                             subscription.SubscriptionId, existingSubscr, subscription));
                     subscription.Dispose();
                 }
+                UpdateReplicationCheckpoint();
             }
         }
 
@@ -174,6 +176,7 @@ namespace EventStore.Core.Services.Replication
 
         private bool SubscribeReplica(ReplicaSubscription replica, Epoch[] lastEpochs, Guid correlationId, long logPosition, Guid chunkId)
         {
+            Log.Debug("~~~~~~~~ Subscribing replica");
             try
             {
                 var epochs = lastEpochs ?? new Epoch[0];
@@ -185,7 +188,6 @@ namespace EventStore.Core.Services.Replication
                 var subscriptionPos = SetSubscriptionPosition(replica, epochCorrectedLogPos, chunkId, 
                                                               replicationStart: true, verbose: true, trial: 0);
                 Interlocked.Exchange(ref replica.AckedLogPosition, subscriptionPos);
-                UpdateReplicationCheckpoint();
                 return true;
             }
             catch (Exception exc)
@@ -612,7 +614,8 @@ namespace EventStore.Core.Services.Replication
 
         private void UpdateReplicationCheckpoint()
         {
-            if(_subscriptions.Count == 0) return;
+            if(_subscriptions.Count == 0 || _subscriptions.Count < _clusterSize/2) return;
+
             var lowestInQuorum = _subscriptions.ToArray().Select(x => x.Value.AckedLogPosition)
                                             .OrderByDescending(x => x).Take(_clusterSize/2).Min();
             var replicationCheckpoint = _db.Config.ReplicationCheckpoint.ReadNonFlushed();
